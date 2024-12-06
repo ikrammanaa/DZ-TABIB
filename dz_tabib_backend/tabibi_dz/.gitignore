@@ -1,0 +1,24 @@
+# Ignore .env file containing sensitive data
+.env
+
+# Ignore Docker related files
+*.log
+*.swp
+Dockerfile*
+docker-compose.yml
+
+# Ignore Python bytecode
+*.pyc
+*.pyo
+
+# Ignore Django migrations
+*/migrations/
+*/__pycache__
+*/uploads
+*/media
+# Ignore static and media files if you don’t want to track them
+static/
+media/
+
+# Ignore other unnecessary files
+*.sqlite3
