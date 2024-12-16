@@ -24,8 +24,8 @@ from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 
 # Models & Serializers Imports
-from .models import PatientManager, DoctorManager
-from .serializers import RegisterSerializer,OTPSerializer,PersonalInfoSerializer
+from .models import PatientManager, DoctorManager, DoctorForm, Adminsrator
+from .serializers import RegisterSerializer,OTPSerializer,PersonalInfoSerializer,doc_personal_info,Form_info
 
 # External Libraries
 import random
@@ -34,6 +34,19 @@ import requests
 
 
 
+
+
+
+import json
+from django.http import JsonResponse
+from django.db import connections
+
+def get_all_patients(request):
+    # Connect to the database
+    
+    patients=PatientManager.fetch_all_patients()
+
+    return JsonResponse({'patients': patients})
 
 from django.shortcuts import render
 
@@ -52,6 +65,50 @@ def send_otp(email, otp):
 
 
 # views.py
+class RegisterStep1View_doc(APIView):
+    serializer_class = RegisterSerializer
+
+    def post(self, request, *args, **kwargs):
+        # Initialize the serializer with the request data
+        serializer = RegisterSerializer(data=request.data)
+        
+        # Validate the serializer
+        if serializer.is_valid():
+            email = serializer.validated_data['email']
+            phone = serializer.validated_data['phone']
+            password = serializer.validated_data['password']
+            
+            # Check if email or phone already exist in the database (using raw SQL)
+            if DoctorManager.filter_by('email', email):
+                return Response({"error": "Email is already in use"}, status=status.HTTP_400_BAD_REQUEST)
+            if DoctorManager.filter_by('phone', phone):
+                return Response({"error": "Phone number is already in use"}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Store the information in the session
+            request.session['step1'] = {'email': email, 'phone': phone, 'password': password}
+            
+            # Generate an OTP and store it in the session
+            otp = generate_otp()
+            request.session['otp'] = otp
+            request.session.save() 
+            print("nihao ",request.session['otp'])
+            
+            # Send OTP (could be email or SMS)
+            send_otp(email, otp)
+             
+            # Return success response
+            return Response({"message": "OTP sent to email"}, status=status.HTTP_201_CREATED)
+        
+        # If validation fails, return the errors
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+
+
+
+
+
+
 class RegisterStep1View(APIView):
     serializer_class = RegisterSerializer
 
@@ -66,9 +123,9 @@ class RegisterStep1View(APIView):
             password = serializer.validated_data['password']
             
             # Check if email or phone already exist in the database (using raw SQL)
-            if PatientManager.filter_patient_by('email', email):
+            if PatientManager.filter_by('email', email):
                 return Response({"error": "Email is already in use"}, status=status.HTTP_400_BAD_REQUEST)
-            if PatientManager.filter_patient_by('phone', phone):
+            if PatientManager.filter_by('phone', phone):
                 return Response({"error": "Phone number is already in use"}, status=status.HTTP_400_BAD_REQUEST)
             
             # Store the information in the session
@@ -266,43 +323,310 @@ class RegisterStep4View(APIView):
         return Response({"message": "Client created successfully"}, status=status.HTTP_201_CREATED)
     
 
+class RegisterStep4_doc(APIView):
+    def post(self, request, *args, **kwargs):
+        form = UploadFileForm(request.POST, request.FILES)
+        
+        # Validate form
+        if not form.is_valid():
+            return Response({"error": "Invalid form submission"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        file = request.FILES.get('file')
+        if not file:
+            return Response({"error": "No file uploaded"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Save the file to the server
+        file_name = file.name
+        file_path = os.path.join(os.path.dirname(__file__), 'uploads', file_name)
+        
+        # Create directories if they don't exist
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        
+        with open(file_path, 'wb+') as destination:
+            for chunk in file.chunks():
+                destination.write(chunk)
+        
+        # Perform OCR on the uploaded file
+        result = ocr_space_api(file_path, api_key='K87236353188957')
+        
+        # Check for errors in OCR response
+        if not result or 'ParsedResults' not in result:
+            return Response({"error": "Failed to extract text from the image"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        parsed_text = result.get('ParsedResults', [{}])[0].get('ParsedText', '')
+        ocr_data = extract_details(parsed_text)
 
+        # Retrieve personal info from session
+        personal_info = request.session.get('step3', None)
+        if not personal_info:
+            return Response({"error": "Personal info is missing from session"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Check if the ID already exists
+        if DoctorManager.fetch_doctor_by_id(ocr_data.get('id_number')):
+            return Response({"error": "ID number is already in use"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Check if step1 data is missing from session
+        if 'step1' not in request.session:
+            return Response({"error": "Step 1 data is missing in session"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Get city_id from step3 session data
+        city_id = personal_info.get('city_id')
+        
+        # Handle missing city_id
+        if not city_id:
+            return Response({"error": "City ID is missing from session"}, status=status.HTTP_400_BAD_REQUEST)
+        from django.db import connection
+
+        card_id=ocr_data.get('id_number')
+        name=str(ocr_data.get('name'))
+        last_name=str(ocr_data.get('last_name'))
+        birth_date=str(ocr_data.get('birth_date')) 
+        try:
+                request.session['step4'] = {
+                    'card_id': card_id,
+                    'name': name,
+                    'last_name': last_name,
+                    'birth_date': birth_date
+                }
+        except Exception as e:
+                # Handle any exception (e.g., session issues, missing data)
+                return Response({"error": f"Error saving data to session:{birth_date},{ocr_data}, {card_id},{name},{last_name}, {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+        
+        return Response({"message": "info filled succesfully successfully"}, status=status.HTTP_201_CREATED)
+    
+
+
+
+class RegisterStep5View(APIView):
+    serializer_class = Form_info
+
+    def post(self, request, *args, **kwargs):
+        # Ensure 'step4' data is available in session
+        if 'step4' not in request.session:
+            return Response({"error": "Step 4 data is missing in session"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Validate the data from the request
+        serializer = Form_info(data=request.data)
+        if serializer.is_valid():
+            # Extract form information
+            form_info = serializer.validated_data
+            speciality = form_info.get('speciality')
+            institut = form_info.get('institut')
+            experience = form_info.get('experience')
+
+            # Attempt to store the data in the session
+            try:
+                request.session['step5'] = {
+                    'speciality': speciality,
+                    'institut': institut,
+                    'experience': experience
+                }
+                request.session.save()  # Persist the session
+            except Exception as e:
+                return Response({"error": f"Error saving step5 data to session: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            # Return a success response
+            return Response({"message": "Professional info added successfully"}, status=status.HTTP_201_CREATED)
+
+        # If validation fails, return serializer errors
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class UploadDocDocument(APIView):
+    def post(self, request, *args, **kwargs):
+        form = UploadFileForm(request.POST, request.FILES)
+            
+            # Validate form
+        if not form.is_valid():
+            return Response({"error": "Invalid form submission"}, status=status.HTTP_400_BAD_REQUEST)
+            
+        file = request.FILES.get('file')
+        if not file:
+            return Response({"error": "No file uploaded"}, status=status.HTTP_400_BAD_REQUEST)
+        email=str(request.session['step1']['email'])
+        phone=int(request.session['step1']['phone'])
+        password=str(request.session['step1']['password'])
+        card_id=request.session['step4']['card_id']
+        name=request.session['step4']['name']
+        last_name=request.session['step4']['last_name']
+        birth_date=request.session['step4']['birth_date']
+        speciality=request.session['step5']['speciality']
+        institut=request.session['step5']['institut']
+        experience=request.session['step5']['experience']
+        city_id=request.session['step3']['city_id']
+        
+        DoctorForm.create_form(
+            email=email,
+            phone=phone,
+            password=password,
+            card_id=card_id,
+            name=name,
+            last_name=last_name,
+            birth_date=birth_date,
+            speciality=speciality,
+            institut=institut,
+            experience=experience,
+            city_id=city_id,
+            document=file,
+        )
+        return Response({"message": "Document uploaded successfully"}, status=status.HTTP_201_CREATED)
+                   
+            
+            # Save the file to the server
+            
+
+from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
+
+#Login
 import jwt 
-class LoginAPIView(APIView):
-    def post(self, request):
-        email = request.data.get('email')
-        password = request.data.get('password')
-        
-        # Ensure email and password are provided
-        if not email or not password:
-            return Response({'error': 'Email and password are required'}, status=status.HTTP_400_BAD_REQUEST)
-        
-        # Fetch user based on email
-        user_queryset = PatientManager.filter_patient_by('email', email)
-        if not user_queryset:
-            raise AuthenticationFailed('User not found')
-        
-        
+def get_authenticated_user(request, Manager):
+    token=request.COOKIES.get('jwt')
+    print("this is the token",token)
+    if not token:
+        return None
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+        print("This is the payload",payload)
+    except InvalidTokenError:
+        return None
+    id=payload.get('id')
+    password=payload.get('password')
+    email=payload.get('email')
+    if Manager.check_password(email, password):
+        return id
+    return None
 
+    
 
-        user = user_queryset
-        if not PatientManager.check_patient_password(email, password):
-            raise AuthenticationFailed('Invalid password')
+class BaseLoginAPIView(APIView):
+    def authenticate_user(self, user,id_type):
         # Create JWT payload without expiration
         payload = {
-            'id': user['card_id'],
+            'id': user[id_type],
+            'password' : user['password'],
+            'email': user['email'],
 
-            
-       }
+
+        }
 
         # Encode the token
-        token = jwt.encode(payload, 'secret', algorithm='HS256')
-        
+        token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
+
         # Prepare the response
         response = Response()
         response.set_cookie(key='jwt', value=token, httponly=True)
         response.data = {'jwt': token}
         response.status_code = status.HTTP_200_OK
+
+        return response
+
+    def post(self, request, *args, **kwargs):
+        # This method should be overridden by subclasses
+        raise NotImplementedError("Subclasses should implement this method")
+
+
+class PatientLoginAPIView(BaseLoginAPIView):
+    def post(self, request, *args, **kwargs):
+        email = request.data.get('email')
+        password = request.data.get('password')
+
+        # Fetch the patient by email
+        patient = PatientManager.filter_by('email', email)
+        if patient and PatientManager.check_password(email, password):
+            return self.authenticate_user(patient,'card_id')
         
+        return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class DoctorLoginAPIView(BaseLoginAPIView):
+    def post(self, request, *args, **kwargs):
+        email = request.data.get('email')
+        password = request.data.get('password')
+
+        # Fetch the doctor by email
+        doctor = DoctorManager.filter_by('email',email)
+        if doctor and DoctorManager.check_password(email, password):
+            return self.authenticate_user(doctor,'docotr_id')
+        
+        return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ManagerLoginAPIView(BaseLoginAPIView):
+    def post(self, request, *args, **kwargs):
+        email = request.data.get('email')
+        password = request.data.get('password')
+
+        # Fetch the manager by email
+        manager = Adminsrator.filter_by('email', email)
+        if manager and Adminsrator.check_password(email, password):
+            return self.authenticate_user(manager,'id')
+        
+        return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
+class ShowDoctorDocumentAPI(APIView):
+
+    def get(self, request, doctor_id, *args, **kwargs):
+        document = DoctorForm.fetch_document_by_id(doctor_id)
+        if document is None:
+            return Response({"error": "Document not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        response = HttpResponse(document, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="document_{doctor_id}.pdf"'
         return response
     
+
+@api_view(['POST'])
+
+def get_document(request, doctor_id):
+    user=get_authenticated_user(request, Adminsrator)
+    if not user:
+        return Response({"error": "Unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+
+    document = DoctorForm.fetch_document_by_id(doctor_id)
+    if document is None:
+        return Response({"error": "Document not found "}, status=status.HTTP_404_NOT_FOUND)
+
+    response = HttpResponse(document, content_type='application/pdf')
+    response['Content-Disposition'] = f'inline; filename="document_{doctor_id}.pdf"'
+    return response
+
+
+
+@api_view(['POST'])
+def approve_doctor(request, doctor_id):
+    user=get_authenticated_user(request, Adminsrator)
+    if not user:
+        return Response({"error": "Unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+    if not DoctorForm.filter_by_id(doctor_id):
+        return Response({"error": "form not found"}, status=status.HTTP_404_NOT_FOUND)
+    Adminsrator.approve_doctor(doctor_id, True)
+    return Response({"message": "Doctor approved successfully"}, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+def reject_doctor(request, doctor_id):
+    user=get_authenticated_user(request, Adminsrator)
+    if not user:
+        return Response({"error": "Unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+    if not DoctorForm.filter_by_id(doctor_id):
+        return Response({"error": "form not found"}, status=status.HTTP_404_NOT_FOUND)
+    Adminsrator.approve_doctor(doctor_id, False)
+    return Response({"message": "Doctor rejected successfully"}, status=status.HTTP_200_OK)
+   
+
+        
+    
+    
+
+class LogoutAPIView(APIView):
+    def post(self, request, *args, **kwargs):
+        response = Response()
+        response.delete_cookie('jwt')
+        response.data = {'message': 'Successfully logged out'}
+        response.status_code = status.HTTP_200_OK
+        return response
