@@ -163,3 +163,16 @@ MEDIA_ROOT=os.path.join(BASE_DIR, 'media')
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
+
+
+import firebase_admin
+from firebase_admin import credentials, storage
+
+# Path to your service account JSON
+FIREBASE_CREDENTIALS = './firebase_service_account.json'
+FIREBASE_STORAGE_BUCKET = 'your-app-id.appspot.com'
+
+# Initialize Firebase if not already initialized
+if not firebase_admin._apps:
+    cred = credentials.Certificate(FIREBASE_CREDENTIALS)
+    firebase_admin.initialize_app(cred, {'storageBucket': FIREBASE_STORAGE_BUCKET})
