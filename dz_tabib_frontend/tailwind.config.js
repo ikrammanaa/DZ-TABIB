@@ -4,7 +4,16 @@ export default {
   
 ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        customBlue: '#1E40AF',
+        blue: '#1376F8',
+        ciel: '#A0E9FF',
+        green:'#72dfc7',
+        bluenuit: '#013559',
+        blue2: '#0090CF',
+       },
+    },
   },
   plugins: [],
 };
