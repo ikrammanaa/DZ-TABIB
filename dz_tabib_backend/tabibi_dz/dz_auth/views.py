@@ -493,7 +493,7 @@ def get_authenticated_user(request, Manager):
     id=payload.get('id')
     password=payload.get('password')
     email=payload.get('email')
-    if Manager.check_password(email, password):
+    if Manager.filter_by("email", email).get('password') == password:
         return id
     return None
 
@@ -533,7 +533,7 @@ class PatientLoginAPIView(BaseLoginAPIView):
 
         # Fetch the patient by email
         patient = PatientManager.filter_by('email', email)
-        if patient and PatientManager.check_password(email, password):
+        if patient and PatientManager.check__password(email, password):
             return self.authenticate_user(patient,'card_id')
         
         return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
@@ -546,7 +546,7 @@ class DoctorLoginAPIView(BaseLoginAPIView):
 
         # Fetch the doctor by email
         doctor = DoctorManager.filter_by('email',email)
-        if doctor and DoctorManager.check_password(email, password):
+        if doctor and DoctorManager.check__password(email, password):
             return self.authenticate_user(doctor,'docotr_id')
         
         return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
@@ -559,7 +559,7 @@ class ManagerLoginAPIView(BaseLoginAPIView):
 
         # Fetch the manager by email
         manager = Adminsrator.filter_by('email', email)
-        if manager and Adminsrator.check_password(email, password):
+        if manager and Adminsrator.check__password(email, password):
             return self.authenticate_user(manager,'id')
         
         return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
@@ -595,7 +595,11 @@ def get_document(request, doctor_id):
     response['Content-Disposition'] = f'inline; filename="document_{doctor_id}.pdf"'
     return response
 
-
+@api_view(['GET'])
+def get_doctor_forms(request):
+    # Connect to the database
+    forms=DoctorForm.fetch_all_doctor_forms()
+    return JsonResponse({'forms': forms})
 
 @api_view(['POST'])
 def approve_doctor(request, doctor_id):
@@ -604,6 +608,15 @@ def approve_doctor(request, doctor_id):
         return Response({"error": "Unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
     if not DoctorForm.filter_by_id(doctor_id):
         return Response({"error": "form not found"}, status=status.HTTP_404_NOT_FOUND)
+    email = DoctorForm.get_email(doctor_id)
+
+    subject = 'Your OTP Code'
+    message = f'your doctor application is approved, welcome to TABIBI DZ'
+    email_from = settings.DEFAULT_FROM_EMAIL
+    recipient_list = [email]
+
+    send_mail(subject, message, email_from, recipient_list)
+
     Adminsrator.approve_doctor(doctor_id, True)
     return Response({"message": "Doctor approved successfully"}, status=status.HTTP_200_OK)
 

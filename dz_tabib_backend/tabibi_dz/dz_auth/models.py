@@ -1,3 +1,6 @@
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import check_password
+
 
 # Create your models here.
 from django.db import connection
@@ -56,20 +59,25 @@ class Adminsrator :
             return None
     
     @staticmethod
-    def check_password(email, password):
+    def check__password(email, password):
         with connection.cursor() as cursor:
             cursor.execute("SELECT password FROM adminstrator WHERE email = %s", [email])
             row = cursor.fetchone()
             if row:
-                if row[0] == password:
-                    return True
+                stored_password = row[0]
+                return check_password(password, stored_password)
             return False
     
         
 class DoctorForm:
 
 
-
+    @staticmethod
+    def fetch_all_doctor_forms():
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM doctor_form")
+            columns = [col[0] for col in cursor.description]
+            return [dict(zip(columns, row)) for row in cursor.fetchall()]
     @staticmethod
     def fetch_document_by_id(doctor_id):
         with connection.cursor() as cursor:
@@ -78,6 +86,16 @@ class DoctorForm:
             if row:
                 return row[0]
             return None
+        
+    @staticmethod
+    def get_email(id):
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT EMAIL FROM doctor_form WHERE id = %s", [id])
+            row = cursor.fetchone()
+            if row:
+                return row[0]
+            return None
+        
     @staticmethod
     def filter_by_id(id):
         with connection.cursor() as cursor:
@@ -94,6 +112,7 @@ class DoctorForm:
         else:
             file_data = None
         with connection.cursor() as cursor:
+            password = make_password(password)
             cursor.execute("""
                 INSERT INTO doctor_form (email,phone,password,card_id,name ,last_name,birth_date,speciality ,institut,experience,city,document)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s,%s,%s,%s,%s)
@@ -104,6 +123,7 @@ class DoctorForm:
 class PatientManager:
     @staticmethod
     def create_patient(card_id, name, last_name, email, phone, password, city_id, birth_date):
+        password = make_password(password)
         with connection.cursor() as cursor:
             cursor.execute("""
                 INSERT INTO patient (card_id, name, last_name, email, phone, password, city_id, birth_date)
@@ -144,15 +164,15 @@ class PatientManager:
                 columns = [col[0] for col in cursor.description]
                 return dict(zip(columns, row))
             return None
-        
+
     @staticmethod
-    def check_password(email, password):
+    def check__password(email, password):
         with connection.cursor() as cursor:
             cursor.execute("SELECT password FROM patient WHERE email = %s", [email])
             row = cursor.fetchone()
             if row:
-                if row[0] == password:
-                    return True
+                stored_password = row[0]
+                return check_password(password, stored_password)
             return False
     
 
@@ -203,11 +223,13 @@ class DoctorManager:
                 return dict(zip(columns, row))
             return None
     @staticmethod
-    def check_password(email, password):
+    def check__password(email, password):
         with connection.cursor() as cursor:
             cursor.execute("SELECT password FROM doctor WHERE email = %s", [email])
             row = cursor.fetchone()
+
             if row:
-                if row[0] == password:
-                    return True
-            return False 
+                stored_password = row[0]
+                return check_password(password, stored_password)
+            return False
+             
