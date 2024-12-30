@@ -17,7 +17,8 @@ Including another URLconf
 from django.urls import include, path
 
 urlpatterns = [
-    path('', include('dz_auth.urls'))
+    path('', include('dz_auth.urls')),
+    path('', include('appointments.urls'))
 
 
 

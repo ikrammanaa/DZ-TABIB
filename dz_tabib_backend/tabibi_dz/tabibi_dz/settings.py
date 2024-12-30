@@ -87,7 +87,7 @@ load_dotenv()
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 WSGI_APPLICATION = 'tabibi_dz.wsgi.application'
-EMAIL_PORT = 587  
+EMAIL_PORT = 587 
 EMAIL_HOST = 'smtp.gmail.com'       # Default to port 587 for TLS
 EMAIL_USE_TLS = 'True'  # Use TLS (True/False)
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')          # SMTP email account
@@ -165,14 +165,5 @@ MEDIA_ROOT=os.path.join(BASE_DIR, 'media')
 
 
 
-import firebase_admin
-from firebase_admin import credentials, storage
-
-# Path to your service account JSON
-FIREBASE_CREDENTIALS = './firebase_service_account.json'
-FIREBASE_STORAGE_BUCKET = 'your-app-id.appspot.com'
-
-# Initialize Firebase if not already initialized
-if not firebase_admin._apps:
-    cred = credentials.Certificate(FIREBASE_CREDENTIALS)
-    firebase_admin.initialize_app(cred, {'storageBucket': FIREBASE_STORAGE_BUCKET})
+# settings.py
+WHEREBY_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmFwcGVhci5pbiIsImF1ZCI6Imh0dHBzOi8vYXBpLmFwcGVhci5pbi92MSIsImV4cCI6OTAwNzE5OTI1NDc0MDk5MSwiaWF0IjoxNzM1NTg0NjM4LCJvcmdhbml6YXRpb25JZCI6MzAxMDY5LCJqdGkiOiI3NTI0NjE0ZS1iMTQ2LTQwNjYtOWZhYS1mZmI1YTU4NDM0ZGUifQ.dLi4gLtbvAr3aAGqRNhXOFt2PBEEehfUSq87OHbcFcs'

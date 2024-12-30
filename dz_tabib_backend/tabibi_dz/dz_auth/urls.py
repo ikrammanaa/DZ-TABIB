@@ -3,7 +3,7 @@ from .views import (RegisterStep1View,VerifyOTPView,RegisterStep3View,
  RegisterStep4View,get_all_patients,RegisterStep1View_doc ,
  RegisterStep4_doc,RegisterStep5View,UploadDocDocument,
  DoctorLoginAPIView, ManagerLoginAPIView,PatientLoginAPIView,LogoutAPIView,
- get_document,approve_doctor, reject_doctor
+ get_document,approve_doctor, reject_doctor,get_doctor_forms
 
  
  )
@@ -27,6 +27,7 @@ urlpatterns = [
     path('login/admin/', ManagerLoginAPIView.as_view(),name='admin_login'),
 
     path('logout/', LogoutAPIView.as_view(), name='logout'),
+    path('admin/doctor_forms/', get_doctor_forms, name='doctor_forms'),
 
     path('admin/approve/<int:doctor_id>/', approve_doctor,name='approved'),
     path('admin/reject/<int:doctor_id>/', reject_doctor,name='rejected'),
