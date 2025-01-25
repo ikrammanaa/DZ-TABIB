@@ -18,7 +18,10 @@ export const AppointmentPage = () => {
   const [questionsList, setQuestionsList] = useState([]);
   const [availableTimes, setAvailableTimes] = useState([]);
   const [loadingTimes, setLoadingTimes] = useState(false);
-  
+  ////////
+  const [comment, setComment] = useState("");
+const [commentsList, setCommentsList] = useState([]);
+
   if (!doctor) {
     return (
       <div className="text-center text-red-500">
@@ -171,6 +174,26 @@ const fetchNearbyPlaces = async (lat, lon) => {
   }
 };
 ////////map end//////////////
+const handleCommentSubmit = async () => {
+  if (comment) {
+    // Simulate sending the comment to the backend (you can replace this with an actual API call)
+    try {
+      const response = await axios.post("http://localhost:5000/api/comments", {
+        doctorId: doctor.id,
+        comment,
+      });
+
+      setCommentsList([...commentsList, { comment, patient: "Patient Name" }]);
+      setComment("");
+      alert("Your comment has been submitted!");
+    } catch (error) {
+      console.error(error);
+      alert("Error submitting your comment.");
+    }
+  } else {
+    alert("Please write a comment.");
+  }
+};
 
 
   return (
@@ -311,7 +334,37 @@ const fetchNearbyPlaces = async (lat, lon) => {
   {/* Optional: You can still add the map here if you'd like */}
   <div id="map" className="  mt-4 p-40 w-full h-64 rounded"></div>
 </div>
+{/* Comment Form */}
+<div className="mb-4">
+    <textarea
+      className="w-full p-2 mt-2 border rounded-lg"
+      rows="4"
+      placeholder="Write your comment here..."
+      value={comment}
+      onChange={(e) => setComment(e.target.value)}
+    ></textarea>
+  </div>
+  <button
+    onClick={handleCommentSubmit}
+    className="w-full p-3 bg-sky-600 text-white rounded-lg hover:bg-sky-700"
+  >
+    Submit Comment
+  </button>
 
+  {/* Display Comments */}
+  <div className="mt-6 space-y-4">
+    <h3 className="text-lg font-semibold text-sky-800">Comments</h3>
+    {commentsList.length === 0 ? (
+      <p className="text-gray-500"></p>
+    ) : (
+      commentsList.map((comment, index) => (
+        <div key={index} className="border-b pb-4">
+          <p className="text-sky-800 font-medium">{comment.patient}</p>
+          <p className="text-gray-600">{comment.comment}</p>
+        </div>
+      ))
+    )}
+  </div>
 
     </div>
   );
