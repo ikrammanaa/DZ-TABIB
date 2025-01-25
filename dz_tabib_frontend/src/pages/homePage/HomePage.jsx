@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 
+export const HomePage = ({  }) => {
+ 
+  
 
-export const HomePage = () => {
-  return( 
-  <h1>home page </h1>
+  return (
+   <h1>HomePage</h1>
   );
 };

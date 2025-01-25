@@ -9,12 +9,22 @@ import { AppointmentPage } from "./pages/appointmentPage/AppointmentPage";
 import  { Identifier } from "./pages/identifier/Identifier";
 import { SignUpPatient } from "./pages/signUpPatient/SignUpPatient";
 import { ForgotPassword } from "./pages/password/ForgotPassword";
+import { Patient } from "./pages/patient/Patient";
+
+import {AccountInfo} from "./pages/patient/AccountInfo";
+import {Appointments} from "./pages/patient/Appointments";
+import {Historique }from "./pages/patient/Historique";
+import {Consultation }from "./pages/patient/Consultation";
+import {Settings }from "./pages/patient/Settings";
+
 import './App.scss';
+import { DoctorCard } from "./pages/patient/DoctorCard";
+
 
 
 
 function App() {
-
+  
   return (
    <>
     <Routes>
@@ -27,6 +37,15 @@ function App() {
         <Route path="identifier" element={<Identifier/>}></Route>
         <Route path="signUpPatient" element={<SignUpPatient/>}></Route>
         <Route path="/password" element={<ForgotPassword />}></Route>
+        <Route path="/patient" element={<Patient />}></Route>
+       {/* Pages spécifiques aux patients */}
+       <Route path="/patient" element={<Patient />} />
+            <Route path="/patient/account" element={<AccountInfo />} />
+            <Route path="/patient/appointments" element={<Appointments />} />
+            <Route path="/patient/historique" element={<Historique />} />
+            <Route path="/patient/consultation/:doctorId" element={<Consultation />} />
+            <Route path="/patient/settings" element={<Settings />} />
+            <Route path="/patient/doctorcard" element={<DoctorCard />} />
         </Routes>
         </>
 

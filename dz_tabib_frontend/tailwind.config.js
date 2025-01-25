@@ -12,6 +12,7 @@ export default {
         green:'#72dfc7',
         bluenuit: '#013559',
         blue2: '#0090CF',
+        softGreen: '#A8D5BA',
        },
     },
   },
