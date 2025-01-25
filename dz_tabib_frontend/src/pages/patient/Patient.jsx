@@ -27,6 +27,9 @@ const [searchTerm, setSearchTerm] = useState(""); // Single search term state
 const [isLoading, setIsLoading] = useState(false);
 //////
 const [activeDoctor, setActiveDoctor] = useState(null); // Tracks the doctor to show in DoctorCard
+const [searchType, setSearchType] = useState("name"); // State to track selected search type
+const [filterByAvailability, setFilterByAvailability] = useState(false); // NEW: Availability filter state
+
 // Mock patient data (you will replace this with actual data after login)
 const patientData = {
   fullName: "Manaa Ikram",
@@ -50,16 +53,34 @@ const handleViewCard = (doctor) => {
   };
 
 // Filter doctors based on search parameters
-const filteredDoctors = doctors.filter((doctor) => {
-  return (
-    doctor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    doctor.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    doctor.specialization.toLowerCase().includes(searchTerm.toLowerCase()) ||
+// const filteredDoctors = doctors.filter((doctor) => {
+//   return (
+//     doctor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+//     doctor.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+//     doctor.specialization.toLowerCase().includes(searchTerm.toLowerCase()) ||
     
-    doctor.insurance.some((ins) => ins.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
-});
+//     doctor.insurance.some((ins) => ins.toLowerCase().includes(searchTerm.toLowerCase()))
+//   );
+// });
+const filteredDoctors = doctors.filter((doctor) => {
+  const term = searchTerm.toLowerCase();
+  let matchesSearchType = false;
 
+  if (searchType === "name") {
+    matchesSearchType = doctor.name.toLowerCase().includes(term);
+  } else if (searchType === "specialization") {
+    matchesSearchType = doctor.specialization.toLowerCase().includes(term);
+  } else if (searchType === "location") {
+    matchesSearchType = doctor.location.toLowerCase().includes(term);
+  } else if (searchType === "insurance") {
+    matchesSearchType = doctor.insurance.some((ins) => ins.toLowerCase().includes(term));
+  }
+
+  // If availability filter is active, include only available doctors
+  const matchesAvailability = !filterByAvailability || doctor.available;
+
+  return matchesSearchType && matchesAvailability;
+});
 ////
 
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -298,11 +319,50 @@ const filteredDoctors = doctors.filter((doctor) => {
     )}
   </button>
 </div>
+{/* Filter Buttons for Search Type */}
+  {/* Search and Filters */}
+  
 
-{/* Display "No Results Found" if no filtered results */}
-{filteredDoctors.length === 0 && searchTerm !== "" && (
-  <p className="text-red-500 mt-4">No results found. Try a different search term.</p>
-)}
+      {/* Search Type and Availability Filter Buttons */}
+      <div className="flex gap-4 mt-6">
+        <button
+          onClick={() => setSearchType("name")}
+          className={`px-4 py-2 rounded-lg ${searchType === "name" ? "bg-blue2 text-white" : "bg-gray-200"}`}
+        >
+          Name
+        </button>
+        <button
+          onClick={() => setSearchType("specialization")}
+          className={`px-4 py-2 rounded-lg ${searchType === "specialization" ? "bg-blue2 text-white" : "bg-gray-200"}`}
+        >
+          Specialization
+        </button>
+        <button
+          onClick={() => setSearchType("location")}
+          className={`px-4 py-2 rounded-lg ${searchType === "location" ? "bg-blue2 text-white" : "bg-gray-200"}`}
+        >
+          Location
+        </button>
+        <button
+          onClick={() => setSearchType("insurance")}
+          className={`px-4 py-2 rounded-lg ${searchType === "insurance" ? "bg-blue2 text-white" : "bg-gray-200"}`}
+        >
+          Insurance
+        </button>
+
+        {/* NEW: Availability Filter Button */}
+        <button
+          onClick={() => setFilterByAvailability((prev) => !prev)}
+          className={`px-4 py-2 rounded-lg ${filterByAvailability ? "bg-blue2 text-white" : "bg-gray-200"}`}
+        >
+          {filterByAvailability ? "Available Only" : "All Doctors"}
+        </button>
+      </div>
+
+      {/* Results Section */}
+      {filteredDoctors.length === 0 && searchTerm !== "" && (
+        <p className="text-red-500 mt-4">No results found. Try a different search term.</p>
+      )}
 
 
            <div className="space-y-6">
