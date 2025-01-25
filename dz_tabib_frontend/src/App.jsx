@@ -15,11 +15,18 @@ import {AccountInfo} from "./pages/patient/AccountInfo";
 import {Appointments} from "./pages/patient/Appointments";
 import {Historique }from "./pages/patient/Historique";
 import {Consultation }from "./pages/patient/Consultation";
-import {Settings }from "./pages/patient/Settings";
-
+import { Settings }from "./pages/patient/Settings";
+import  Contact from "./pages/contact/Contact";
 import './App.scss';
 import { DoctorCard } from "./pages/patient/DoctorCard";
+import Profiledoct from "./pages/doctorProfile/components/Profiledoct";
+import Avalability from "./pages/doctorProfile/components/Avalability";
+import Appointements from "./pages/doctorProfile/components/Appointements";
+import History from "./pages/doctorProfile/components/History";
 
+import DoctorSettings from "./pages/doctorProfile/components/DoctorSettings";
+import MapComponent from "./pages/doctorProfile/components/MapComponent";
+import Editprofile from "./pages/doctorProfile/components/Editprofile";
 
 
 
@@ -29,6 +36,7 @@ function App() {
    <>
     <Routes>
         <Route path="/" element={<HomePage/>} />
+        <Route path="/contact" element={<Contact />} />
         <Route path="login" element={<Login/>} />
         <Route path="signUpDoctor" element={<SignUpDoctor/>} />
         <Route path="doctors" element={<Doctors/>} />
@@ -46,6 +54,15 @@ function App() {
             <Route path="/patient/consultation/:doctorId" element={<Consultation />} />
             <Route path="/patient/settings" element={<Settings />} />
             <Route path="/patient/doctorcard" element={<DoctorCard />} />
+          {/* Pages spécifiques aux patients */}
+        <Route path="profiledoct" element={<Profiledoct/>} />
+        <Route path="editprofile" element={<Editprofile/>} />
+        <Route path="availability" element={<Avalability/>} />
+        <Route path="appointments" element={<Appointements/>} />
+        <Route path="history" element={<History/>} />
+        <Route path="consultation" element={<Consultation/>} />
+        <Route path="settings" element={<DoctorSettings/>} />
+        <Route path="map" element={<MapComponent/>} />
         </Routes>
         </>
 

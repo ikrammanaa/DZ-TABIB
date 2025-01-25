@@ -226,13 +226,13 @@ const AvailabilityCalendar = ({ doctor }) => {
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
-        <button onClick={prevWeek} className="text-white px-2 py-1 rounded hover:text-red-500">
+        <button onClick={prevWeek} className="text-gray-600 px-2 py-1 rounded hover:text-red-500">
           &lt; Previous
         </button>
         <h2 className="text-bluenuit hover:text-lg">
           Week: {weekDates[0].toLocaleDateString()} - {weekDates[6].toLocaleDateString()}
         </h2>
-        <button onClick={nextWeek} className="text-white px-2 py-1 rounded hover:text-green">
+        <button onClick={nextWeek} className="text-gray-600 px-2 py-1 rounded hover:text-green">
           Next &gt;
         </button>
       </div>
@@ -271,7 +271,7 @@ const AvailabilityCalendar = ({ doctor }) => {
                           <button
                             key={idx}
                             onClick={() => handleTimeClick(time, date)}
-                            className="bg-gray-200 shadow-lg text-blue2 px-3 py-1 rounded hover:bg-blue-200"
+                            className="bg-white shadow-lg text-blue2 px-3 py-1 rounded hover:bg-blue-200"
                           >
                             {time}
                           </button>
@@ -323,8 +323,8 @@ export const DoctorCard = ({ doctor }) => {
         />
         <h3 className="text-lg text-bluenuit font-bold">{doctor.name}</h3>
         <p className="text-sm text-bluenuit">{doctor.specialization}</p>
-        <p className="text-sm text-gray-100">{doctor.location}</p>
-        <p className="text-sm text-gray-100 font-bold">{doctor.fees} DA</p>
+        <p className="text-sm text-gray-900">{doctor.location}</p>
+       
         <p className="text-yellow-300 text-sm mt-2">
           {doctor.rating} ★★★★ ({doctor.reviews} reviews)
         </p>
