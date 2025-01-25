@@ -4,20 +4,23 @@ import { TbClockHour3 } from "react-icons/tb";
 import { GoGraph } from "react-icons/go";
 import { IoChatboxEllipsesOutline, IoSettingsOutline, IoLogInOutline } from "react-icons/io5";
 import { NavLink } from "react-router-dom";
+import { useTranslation } from "react-i18next"; // Import useTranslation
 
 const Sidebardoct = () => {
+  const { t } = useTranslation(); // Access translation function
+
   const menuItems = [
-    { path: "/Profiledoct", label: "My Profile", icon: <MdOutlinePersonOutline  /> },
-    { path: "/availability", label: "Availability", icon: <IoMdCalendar /> },
-    { path: "/appointments", label: "Appointments", icon: <TbClockHour3 /> },
-    { path: "/history", label: "History", icon: <GoGraph /> },
-    { path: "/consultation", label: "Consultation", icon: <IoChatboxEllipsesOutline /> },
-    { path: "/settings", label: "Settings", icon: <IoSettingsOutline /> },
-    { path: "/", label: "Sign out", icon: <IoLogInOutline /> },
+    { path: "/Profiledoct", label: t("myProfile"), icon: <MdOutlinePersonOutline /> },
+    { path: "/availability", label: t("availability"), icon: <IoMdCalendar /> },
+    { path: "/appointments", label: t("appointments"), icon: <TbClockHour3 /> },
+    { path: "/history", label: t("history"), icon: <GoGraph /> },
+    { path: "/consultation", label: t("consultation"), icon: <IoChatboxEllipsesOutline /> },
+    { path: "/settings", label: t("settings"), icon: <IoSettingsOutline /> },
+    { path: "/", label: t("signOut"), icon: <IoLogInOutline /> },
   ];
 
   return (
-    <div className="h-full  m-0 shadow-lg" style={{ backgroundColor: "#CDF5FD" }}>
+    <div className="h-full m-0 shadow-lg" style={{ backgroundColor: "#CDF5FD" }}>
       <div className="menu h-full flex flex-col gap-6 p-7">
         {menuItems.map((item) => (
           <NavLink
@@ -25,14 +28,16 @@ const Sidebardoct = () => {
             to={item.path}
             className={({ isActive }) =>
               `list-none flex gap-3 items-center p-1 rounded-lg ${
-                isActive ? "text-white bg-[#0090CF]" : "text-[#737791] hover:bg-[#0090CF] hover:text-white"
+                isActive
+                  ? "text-white bg-[#0090CF]"
+                  : "text-[#737791] hover:bg-[#0090CF] hover:text-white"
               }`
             }
           >
-           <div className="flex flex-row items-center gap-3">
-    <span className="text-xl">{item.icon}</span>
-    <p>{item.label}</p>
-  </div>
+            <div className="flex flex-row items-center gap-3">
+              <span className="text-xl">{item.icon}</span>
+              <p>{item.label}</p>
+            </div>
           </NavLink>
         ))}
       </div>
@@ -41,8 +46,6 @@ const Sidebardoct = () => {
 };
 
 export default Sidebardoct;
-
-
 
 
 

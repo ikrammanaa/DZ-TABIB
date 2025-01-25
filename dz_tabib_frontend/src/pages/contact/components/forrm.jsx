@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next"; // Importer useTranslation
 
 const Forrm = () => {
-  // State for each form field
+  const { t } = useTranslation(); // Hook pour accéder aux traductions
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -18,49 +20,49 @@ const Forrm = () => {
     const { name, value, type, checked } = e.target;
     setFormData({
       ...formData,
-      [name]: type === "checkbox" ? checked : value, // Handle checkbox as well
+      [name]: type === "checkbox" ? checked : value,
     });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setShowPopup(true); // Show popup after submission
+    setShowPopup(true);
   };
 
   return (
     <div>
       <div className="flex flex-col items-center justify-center mt-10">
         <h1 className="text-4xl font-bold m-10" style={{ color: "#013559" }}>
-          Contact Us
+          {t("title")} {/* Utilisation de la traduction */}
         </h1>
-        <p className="text-center">You may contact us for any question or problem</p>
+        <p className="text-center">{t("description")}</p>
       </div>
 
       <form onSubmit={handleSubmit}>
         <div className="m-32 mt-16">
           <div className="h-20 flex justify-around gap-10">
             <div className="flex flex-col">
-              <label htmlFor="first-name">First name</label>
+              <label htmlFor="first-name">{t("firstName")}</label>
               <input
                 type="text"
                 id="first-name"
                 name="firstName"
                 value={formData.firstName}
                 onChange={handleChange}
-                placeholder="Enter your first name"
+                placeholder={t("placeholder.firstName")}
                 className="w-96 h-10 p-3 rounded border border-[#0090CF] focus:outline-none focus:ring-[#0090CF]"
                 required
               />
             </div>
             <div className="flex flex-col">
-              <label htmlFor="last-name">Last name</label>
+              <label htmlFor="last-name">{t("lastName")}</label>
               <input
                 type="text"
                 id="last-name"
                 name="lastName"
                 value={formData.lastName}
                 onChange={handleChange}
-                placeholder="Enter your last name"
+                placeholder={t("placeholder.lastName")}
                 className="w-96 h-10 p-3 rounded border border-[#0090CF] focus:outline-none focus:ring-[#0090CF]"
                 required
               />
@@ -69,27 +71,27 @@ const Forrm = () => {
 
           <div className="h-20 flex justify-around gap-10 mt-10">
             <div className="flex flex-col">
-              <label htmlFor="email">Email</label>
+              <label htmlFor="email">{t("email")}</label>
               <input
                 type="email"
                 id="email"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                placeholder="Enter your email"
+                placeholder={t("placeholder.email")}
                 className="outline-none w-96 h-10 p-3 rounded border border-[#0090CF] focus:outline-none focus:ring-[#0090CF]"
                 required
               />
             </div>
             <div className="flex flex-col">
-              <label htmlFor="phone-number">Phone number</label>
+              <label htmlFor="phone-number">{t("phoneNumber")}</label>
               <input
                 type="phone"
                 id="phone-number"
                 name="phoneNumber"
                 value={formData.phoneNumber}
                 onChange={handleChange}
-                placeholder="Enter your phone number"
+                placeholder={t("placeholder.phoneNumber")}
                 className="outline-none w-96 h-10 p-3 rounded border border-[#0090CF] focus:outline-none focus:ring-[#0090CF]"
                 required
               />
@@ -97,7 +99,7 @@ const Forrm = () => {
           </div>
 
           <div className="select flex flex-col m-10 mt-10">
-            <label htmlFor="medical-specialties">Choose a topic</label>
+            <label htmlFor="medical-specialties">{t("topic")}</label>
             <select
               id="medical-specialties"
               name="topic"
@@ -106,66 +108,60 @@ const Forrm = () => {
               className="outline-none h-12 p-2 rounded-lg border border-[#0090CF] w-full focus:outline-none focus:ring-[#0090CF]"
               required
             >
-              <option value="">Select one ...</option>
-              <option value="Cardiology">Cardiology</option>
-              <option value="Dermatology">Dermatology</option>
-              <option value="Neurology">Neurology</option>
-              <option value="Pediatrics">Pediatrics</option>
-              <option value="Orthopedics">Orthopedics</option>
-              <option value="Oncology">Oncology</option>
-              <option value="Psychiatry">Psychiatry</option>
-              <option value="General Surgery">General Surgery</option>
-              <option value="Gynecology">Gynecology</option>
-              <option value="Radiology">Radiology</option>
+              <option value="">{t("placeholder.topic")}</option>
+              <option value="Cardiology">{t("Cardiology")}</option>
+              <option value="Dermatology">{t("Dermatology")}</option>
+              {/* Ajoute d'autres traductions si nécessaire */}
             </select>
           </div>
 
           <div className="mssg flex flex-col m-10 ">
-            <label htmlFor="message">Message</label>
+            <label htmlFor="message">{t("message")}</label>
             <input
               type="text"
               id="message"
               name="message"
               value={formData.message}
               onChange={handleChange}
-              placeholder="Type your message ..."
+              placeholder={t("placeholder.message")}
               className="outline-none w-full h-40 p-3 rounded border border-[#0090CF] focus:outline-none focus:ring-[#0090CF]"
               required
             />
           </div>
 
-          <div className=" flex ml-20 gap-5 ">
+          <div className="flex ml-20 gap-5 ">
             <input
               type="checkbox"
               name="termsAccepted"
               checked={formData.termsAccepted}
               onChange={handleChange}
               required
-            /> I accept the terms
+            />{" "}
+            {t("terms")}
           </div>
 
-          <div className=" m-5 w-full flex justify-center items-center">
+          <div className="m-5 w-full flex justify-center items-center">
             <button
               type="submit"
               className="w-80 py-3 mr-20 bg-[#0090CF] text-white rounded-lg hover:bg-[#007bb5]"
             >
-              Submit
+              {t("submit")}
             </button>
           </div>
         </div>
       </form>
 
-      {/* Popup with dynamic content */}
+      {/* Popup de confirmation */}
       {showPopup && (
         <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-5 rounded-lg w-80 text-center">
-            <h2 className="font-bold text-xl mb-3">Thank you for contacting us!</h2>
-            <p>An email response will be sent as soon as possible. </p>
+            <h2 className="font-bold text-xl mb-3">{t("thankYou")}</h2>
+            <p>{t("response")}</p>
             <button
               onClick={() => setShowPopup(false)}
               className="mt-5 bg-[#0090CF] text-white px-4 py-2 rounded-lg"
             >
-              Close
+              {t("close")}
             </button>
           </div>
         </div>

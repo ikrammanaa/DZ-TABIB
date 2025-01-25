@@ -1,7 +1,29 @@
 import { Link } from "react-router-dom";
 import { FaArrowRight } from "react-icons/fa6";
+import { useTranslation } from 'react-i18next';  // Import useTranslation
+
+// LanguageSwitcher component
+function LanguageSwitcher() {
+  const { i18n } = useTranslation();
+  const handleLanguageChange = (lang) => {
+    i18n.changeLanguage(lang); // Change the language
+  };
+
+  return (
+    <div className="language-switcher flex gap-3 items-center">
+      <button onClick={() => handleLanguageChange('en')} className="px-2 py-1 text-sm">
+        English
+      </button>
+      <button onClick={() => handleLanguageChange('fr')} className="px-2 py-1 text-sm">
+        Français
+      </button>
+    </div>
+  );
+}
 
 export default function Navbar() {
+  const { t } = useTranslation();  // Access translation function
+
   return (
     <nav style={{ backgroundColor: "#CDF5FD" }}>
       <div
@@ -13,46 +35,33 @@ export default function Navbar() {
         </div>
         <div className="part2 flex gap-5">
           <Link to="/" className="text-base underline">
-            Home
+            {t('home')} {/* Translated "Home" */}
           </Link>
           <Link to="/contact" className="hover:underline">
-            Contact Us
+            {t('contactUs')} {/* Translated "Contact Us" */}
           </Link>
         </div>
         <div className="part3 flex gap-6">
           <Link to="/login" style={{ color: "#0090CF" }} className="hover:underline">
-            Login
+            {t('login')} {/* Translated "Login" */}
           </Link>
 
-          <Link to="/doctor/:id"> {/*to profiledoct*/}
-          <button
-            className="flex items-center gap-2 w-22 px-1 h-8 rounded"
-            style={{
-              backgroundColor: "#0090CF",
-              color: "#FFFFFF",
-              fontFamily: "montserrat",
-            }}
-          >
-          Join Us <FaArrowRight />  
-          </button>
+          <Link to="/doctor/:id">
+            <button
+              className="flex items-center gap-2 w-22 px-1 h-8 rounded"
+              style={{
+                backgroundColor: "#0090CF",
+                color: "#FFFFFF",
+                fontFamily: "montserrat",
+              }}
+            >
+              {t('joinUs')} <FaArrowRight /> {/* Translated "Join Us" */}
+            </button>
           </Link>
         </div>
+        {/* Add the LanguageSwitcher component here */}
+        <LanguageSwitcher />
       </div>
     </nav>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

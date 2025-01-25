@@ -1,14 +1,15 @@
-import { useState, useEffect ,useRef}from "react";
+import { useState, useEffect, useRef } from "react";
 import Sidebardoct from "./sidebardoct";
 import Navdoct from "./Navdoct";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Link } from "react-router-dom";
+import { useTranslation } from 'react-i18next'; // Import useTranslation hook
+
 const ProfileDoctor = () => {
- 
-  // State to hold doctor's information
-  {/*si les infos change on ajoute ,setDoctor !!!!!*/}
-  const [doctor] = useState({    
+  const { t } = useTranslation(); // Use the translation hook
+
+  const [doctor] = useState({
     name: "Dr. Dahmane Bushra",
     specialization: "Cardiologue",
     location: "Alger",
@@ -37,10 +38,10 @@ const ProfileDoctor = () => {
         `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`
       );
       const data = await response.json();
-      return data.display_name || "Adresse introuvable";
+      return data.display_name || t('addressNotFound'); // Use translation
     } catch (error) {
       console.error("Erreur lors de la récupération de l’adresse :", error);
-      return "Erreur de récupération de l’adresse";
+      return t('addressError'); // Use translation
     }
   };
 
@@ -78,33 +79,14 @@ const ProfileDoctor = () => {
     }
   }, [coordinates]);
 
-  // Example of Updating Doctor Information
-  // const updateDoctorInfo = () => {
-  //   setDoctor({
-  //     name: "Dr. Sara Benali",
-  //     specialization: "Dentiste",
-  //     location: "Oran",
-  //     gender: "Female",
-  //     age: 35,
-  //     experience: "7 ans expérience",
-  //     clinicAddress: "456 Smile Avenue, Oran",
-  //     email: "clinic2@clinic.com",
-  //     phone: "06 77 88 99 00",
-  //     insurances: ["CNAS", "Assurance Privée"],
-  //     workingHours: { daily: "6 heures", weekly: "4 jours" },
-  //   });
-
-  //   setCoordinates({ lat: 35.70, lon: -0.63 }); // Update Map Location
-  // };
-
   return (
-    <div className=" h-full flex flex-col " >
-    <div> <Navdoct /></div> 
+    <div className=" h-full flex flex-col">
+      <div><Navdoct /></div>
       <div className="flex flex-1">
-       <div>
-               <Sidebardoct className=" h-[calc(100vh-3.5rem)] " />
-               </div>
-        <div className="content p-10 w-full h-[calc(100vh-3.5rem)] ">
+        <div>
+          <Sidebardoct className=" h-[calc(100vh-3.5rem)]" />
+        </div>
+        <div className="content p-10 w-full h-[calc(100vh-3.5rem)]">
           <div className="top flex gap-4">
             <img className="w-20" src="/src/assets/doctor.png" alt="Doctor" />
             <div className="coordonnees">
@@ -113,7 +95,7 @@ const ProfileDoctor = () => {
                 {doctor.specialization} - <span>{doctor.location}</span>
               </p>
               <p>
-                {doctor.gender} - <span>{doctor.age} ans</span>
+                {doctor.gender} - <span>{doctor.age} {t('yearsOld')}</span>
               </p>
             </div>
           </div>
@@ -122,36 +104,36 @@ const ProfileDoctor = () => {
             <div className="left w-1/2 mt-5">
               <div className="m-2">
                 <h3 className="font-bold" style={{ color: "#0090CF" }}>
-                  Spécialité
+                  {t('specialization')}
                 </h3>
                 <p>{doctor.specialization}</p>
               </div>
               <div className="m-2">
                 <h3 className="font-bold" style={{ color: "#0090CF" }}>
-                  Expérience
+                  {t('experience')}
                 </h3>
                 <p>{doctor.experience}</p>
               </div>
               <div className="m-2">
                 <h3 className="font-bold" style={{ color: "#0090CF" }}>
-                  Informations sur la clinique
+                  {t('clinicInfo')}
                 </h3>
-                <p>Adresse: {doctor.clinicAddress}</p>
-                <p>Email: {doctor.email}</p>
-                <p>Téléphone: {doctor.phone}</p>
+                <p>{t('address')}: {doctor.clinicAddress}</p>
+                <p>{t('email')}: {doctor.email}</p>
+                <p>{t('phone')}: {doctor.phone}</p>
               </div>
               <div className="m-2">
                 <h3 className="font-bold" style={{ color: "#0090CF" }}>
-                  Assurances acceptées
+                  {t('insurancesAccepted')}
                 </h3>
                 <p>{doctor.insurances.join(", ")}</p>
               </div>
               <div className="m-2">
                 <h3 className="font-bold" style={{ color: "#0090CF" }}>
-                  Horaires de travail
+                  {t('workingHours')}
                 </h3>
-                <p>Heures par jour: {doctor.workingHours.daily}</p>
-                <p>Jours par semaine: {doctor.workingHours.weekly}</p>
+                <p>{t('dailyHours')}: {doctor.workingHours.daily}</p>
+                <p>{t('weeklyDays')}: {doctor.workingHours.weekly}</p>
               </div>
             </div>
 
@@ -159,13 +141,13 @@ const ProfileDoctor = () => {
             <div className="right w-1/2 mt-6">
               <div id="map" className="w-full h-64 border rounded-md"></div>
               <p className="mt-4">
-                <strong>Adresse:</strong> {address}
+                <strong>{t('address')}:</strong> {address}
               </p>
               <Link to="/editprofile">
-        <button className="mt-4 ml-72 p-2 bg-blue-500 text-white rounded">
-          Modify Profile
-        </button>
-      </Link>
+                <button className="mt-4 ml-72 p-2 bg-blue-500 text-white rounded">
+                  {t('modifyProfile')}
+                </button>
+              </Link>
             </div>
           </div>
         </div>

@@ -1,4 +1,3 @@
-
 import { Route, Routes } from "react-router-dom";
 import { HomePage } from "./pages/homePage/HomePage";  
 import { Login } from "./pages/login/Login";
@@ -15,6 +14,7 @@ import Consultation from "./pages/doctorProfile/components/consultation";
 import Settings from "./pages/doctorProfile/components/Settings";
 import MapComponent from "./pages/doctorProfile/components/MapComponent";
 import Editprofile from "./pages/doctorProfile/components/Editprofile";
+import"./i18n";
 import './App.scss';
 
 
