@@ -270,7 +270,7 @@ const filteredDoctors = doctors.filter((doctor) => {
         </div>
       )}
         {/* Main Content */}
-        <main className=" md:ml-20 lg:ml-60 w-full bg-blue2 bg-opacity-10 shadow-md p-10 pt-20 space-y-8 overflow-y-auto">
+        <main className=" md:ml-20 lg:ml-60 w-full   p-10 pt-20 space-y-8 overflow-y-auto">
          {/* Filters */}
 <div className="flex flex-wrap items-center gap-4 rounded-lg">
   <div className="relative flex-1">
@@ -309,7 +309,7 @@ const filteredDoctors = doctors.filter((doctor) => {
       {filteredDoctors.map((doctor, idx) => (
         <div
           key={idx}
-          className="bg-blue2 bg-opacity-60 shadow-lg rounded-lg p-5 flex items-center space-x-6 hover:shadow-xl transition duration-300"
+          className="bg-blue2 bg-opacity-10 shadow-lg rounded-lg p-5 flex items-center space-x-6 hover:shadow-xl transition duration-300"
         >
           {activeDoctor?.id === doctor.id ? (
             <DoctorCard doctor={doctor} /> // Render DoctorCard if active
@@ -339,7 +339,7 @@ const filteredDoctors = doctors.filter((doctor) => {
   <span>View Profile</span> {/* Button text */}
 </button>
 <button
-  className="text-white  text-lg px-1 py-2 rounded-lg hover:bg-blue-700 transition duration-200 flex items-center space-x-1"
+  className="text-blue2  text-lg px-1 py-2 rounded-lg hover:bg-blue-700 transition duration-200 flex items-center space-x-1"
   onClick={() => handleViewCard(doctor)} // Handle card replacement
 >
   <FaCalendarAlt className="text-lg" /> {/* Icon */}
