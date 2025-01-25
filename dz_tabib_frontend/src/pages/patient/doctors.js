@@ -9,8 +9,8 @@ export const doctors = [
       reviews: 1821,
       img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQfEry1FIDXr2v6ZEvWOn0PgOjsbsthO06JsA&s",
       availability: {
-        "2024-12-28": ["08:00 AM"],
-        "2024-12-31": ["08:00 AM", "10:00 AM", "02:00 PM"],
+        "2025-01-30": ["08:00 AM"],
+        "2025-01-31": ["08:00 AM", "10:00 AM", "02:00 PM"],
       },
       insurance: ["CNA", "AXA", "Allianz"],
       description: "Dr. Karima Boulasbaa is a highly experienced cardiologist with a deep knowledge of heart health. She has been practicing for over 15 years and is known for her thorough approach to patient care.",
