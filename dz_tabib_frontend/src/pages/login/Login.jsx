@@ -32,74 +32,20 @@ export const Login = () => {
       const user = result.user; // Get user details
       console.log("Google Login Successful:", user);
       alert(`Welcome, ${user.displayName || "User"}!`);
-      navigate("/dashboard"); // Navigate to dashboard after login
+      navigate("/patient"); // Navigate to dashboard after login
     } catch (error) {
       console.error("Google Login Failed:", error);
       setError("Google login failed. Please try again.");
     }
   };
 
-  // const handleEmailLogin = (e) => {
-  //   e.preventDefault();
-  //   setLoading(true);
-  //   setError("");
-
-  //   // Simulate login validation
-  //   setTimeout(() => {
-  //     setLoading(false);
-
-  //     if (!email.includes("@") || password.length < 6) {
-  //       setError(
-  //         "Invalid email or password. Password must be at least 6 characters long."
-  //       );
-  //       return;
-  //     }
-
-  //     if (rememberMe) {
-  //       localStorage.setItem("rememberedEmail", email);
-  //     } else {
-  //       localStorage.removeItem("rememberedEmail");
-  //     }
-
-  //     navigate("/dashboard");
-  //   }, 1500);
-  // };
-
+  
   const handleEmailLogin = async (e) => { // Make this function async
     e.preventDefault();
     setLoading(true);
     setError("");
-  
-    try {
-      // Send login request to the Django backend
-      const response = await fetch("/api/token/", { // Change to your backend URL
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      });
-  
-      const data = await response.json();
-  
-      if (response.ok) {
-        // Successful login, save token to localStorage
-        localStorage.setItem("token", data.access); // assuming the token is in `access`
-        alert("Login successful!");
-        navigate("/dashboard");
-      } else {
-        // Handle errors (e.g., wrong credentials)
-        setError(data.detail || "Login failed. Please try again.");
-      }
-    } catch (err) {
-      console.error("Login error:", err);
-      setError("An error occurred. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+    navigate("/patient");
+    
   };
   
   return (
