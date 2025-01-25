@@ -11,6 +11,7 @@ import { SignUpPatient } from "./pages/signUpPatient/SignUpPatient";
 import { ForgotPassword } from "./pages/password/ForgotPassword";
 import { Patient } from "./pages/patient/Patient";
 
+
 import {AccountInfo} from "./pages/patient/AccountInfo";
 import {Appointments} from "./pages/patient/Appointments";
 import {Historique }from "./pages/patient/Historique";
@@ -61,7 +62,7 @@ function App() {
         <Route path="appointments" element={<Appointements/>} />
         <Route path="history" element={<History/>} />
         <Route path="consultation" element={<Consultation/>} />
-        <Route path="settings" element={<DoctorSettings/>} />
+        <Route path="settings" element={<DoctorSettings />} />
         <Route path="map" element={<MapComponent/>} />
         </Routes>
         </>
