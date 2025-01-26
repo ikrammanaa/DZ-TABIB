@@ -11,6 +11,7 @@ export const doctors = [
       availability: {
         "2025-01-30": ["08:00 AM"],
         "2025-01-31": ["08:00 AM", "10:00 AM", "02:00 PM"],
+        "2025-02-04": ["08:00 AM", "10:00 AM", "02:00 PM"]
       },
       insurance: ["CNA", "AXA", "Allianz"],
       description: "Dr. Karima Boulasbaa is a highly experienced cardiologist with a deep knowledge of heart health. She has been practicing for over 15 years and is known for her thorough approach to patient care.",
@@ -28,7 +29,7 @@ export const doctors = [
       img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTbnYZ2v6ZEvWOn0PgOjsbsthO06JsA&s",
       availability: {
         "2024-12-28": ["08:00 AM"],
-        "2025-01-30": ["08:00 AM", "10:00 AM", "02:00 PM"]
+        "2025-02-06": ["08:00 AM", "10:00 AM", "02:00 PM"]
       },
       insurance: ["CNA", "SMA"],
       description: "Dr. Louiza Boulasbaa is a renowned dermatologist specializing in skin conditions and cosmetic dermatology. She has a passion for helping her patients achieve healthy, glowing skin.",
@@ -45,9 +46,9 @@ export const doctors = [
       reviews: 500,
       img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTbF3v6ZEvWOn0PgOjsbsthO06JsA&s",
       availability: {
-        "2025-01-02": ["08:00 AM"],
+        "2025-02-02": ["08:00 AM"],
         "2024-12-29": ["08:00 AM", "10:00 AM", "02:00 PM"],
-        "2024-12-30": ["08:00 AM"]
+        "2025-02-04": ["08:00 AM"]
       },
       insurance: ["AXA", "SMA"],
       description: "Dr. Farah Kenar is a pediatrician who has been dedicated to the health and well-being of children for over 10 years. She is known for her compassionate approach and ability to put children at ease during consultations.",
@@ -65,7 +66,7 @@ export const doctors = [
       img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQfEry1FIDXr2v6ZEvWOn0PgOjsbsthO06JsA&s",
       availability: {
         "2024-12-28": ["08:00 AM"],
-        "2024-12-29": ["08:00 AM", "10:00 AM", "02:00 PM"],
+        "2025-02-09": ["08:00 AM", "10:00 AM", "02:00 PM"],
         "2024-12-30": ["08:00 AM", "10:00 AM", "02:00 PM"]
       },
       insurance: ["CNA", "Allianz"],
