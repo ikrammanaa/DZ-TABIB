@@ -13,7 +13,7 @@ export default defineConfig({
   plugins: [react()],
   build: {
     rollupOptions: {
-      external: ['react-calendar'], // Add this line
+     
       chunkSizeWarningLimit: 1000, // Optional: Suppress chunk size warning
   
     },
