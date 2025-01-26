@@ -6,7 +6,11 @@ class SQLiteRouter:
      
     def db_for_read(self, model, **hints):
         # Route reads for dz_auth or other apps to MySQL, sessions to SQLite
+<<<<<<< HEAD
         if model._meta.app_label == 'dz_auth':
+=======
+        if model._meta.app_label in ['dz_auth', 'appointments']:
+>>>>>>> 403676c8b27c6a22bf4eaf64872c5c9d742c71b9
             return 'default'  # MySQL for dz_auth custom models
         if model._meta.app_label == 'sessions':
             return 'sqlite'  # SQLite for session table
@@ -14,7 +18,11 @@ class SQLiteRouter:
 
     def db_for_write(self, model, **hints):
         # Route writes for dz_auth or other apps to MySQL, sessions to SQLite
+<<<<<<< HEAD
         if model._meta.app_label == 'dz_auth':
+=======
+        if model._meta.app_label in ['dz_auth', 'appointments']:
+>>>>>>> 403676c8b27c6a22bf4eaf64872c5c9d742c71b9
             return 'default'  # MySQL for dz_auth custom models
         if model._meta.app_label == 'sessions':
             return 'sqlite'  # SQLite for session table
@@ -25,7 +33,11 @@ class SQLiteRouter:
 
     def allow_migrate(self, db, app_label, model_name=None, **hints):
         # If migrating 'dz_auth', use MySQL; for sessions, use SQLite
+<<<<<<< HEAD
         if app_label == 'dz_auth':
+=======
+        if app_label in ['dz_auth', 'appointments']:
+>>>>>>> 403676c8b27c6a22bf4eaf64872c5c9d742c71b9
             return db == 'default'  # MySQL for dz_auth
         if app_label == 'sessions':
             return db == 'sqlite'  # SQLite for sessions

@@ -1,8 +1,14 @@
-import React from "react";
 
-
+import ProfileDoctor from "./components/Profiledoct";
 export const DoctorProfile = () => {
-  return( 
-  <h1>doctors profile page </h1>
+  return (
+    <div>
+      <div className="page h-full">
+       <ProfileDoctor/>
+      </div>
+   
+    </div>
   );
-};
+}
+
+export default DoctorProfile;

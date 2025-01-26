@@ -17,7 +17,12 @@ Including another URLconf
 from django.urls import include, path
 
 urlpatterns = [
+<<<<<<< HEAD
     path('', include('dz_auth.urls'))
+=======
+    path('', include('dz_auth.urls')),
+    path('', include('appointments.urls'))
+>>>>>>> 403676c8b27c6a22bf4eaf64872c5c9d742c71b9
 
 
 

@@ -1,3 +1,9 @@
+<<<<<<< HEAD
+=======
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import check_password
+
+>>>>>>> 403676c8b27c6a22bf4eaf64872c5c9d742c71b9
 
 # Create your models here.
 from django.db import connection
@@ -56,20 +62,38 @@ class Adminsrator :
             return None
     
     @staticmethod
+<<<<<<< HEAD
     def check_password(email, password):
+=======
+    def check__password(email, password):
+>>>>>>> 403676c8b27c6a22bf4eaf64872c5c9d742c71b9
         with connection.cursor() as cursor:
             cursor.execute("SELECT password FROM adminstrator WHERE email = %s", [email])
             row = cursor.fetchone()
             if row:
+<<<<<<< HEAD
                 if row[0] == password:
                     return True
+=======
+                stored_password = row[0]
+                return check_password(password, stored_password)
+>>>>>>> 403676c8b27c6a22bf4eaf64872c5c9d742c71b9
             return False
     
         
 class DoctorForm:
 
 
+<<<<<<< HEAD
 
+=======
+    @staticmethod
+    def fetch_all_doctor_forms():
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM doctor_form")
+            columns = [col[0] for col in cursor.description]
+            return [dict(zip(columns, row)) for row in cursor.fetchall()]
+>>>>>>> 403676c8b27c6a22bf4eaf64872c5c9d742c71b9
     @staticmethod
     def fetch_document_by_id(doctor_id):
         with connection.cursor() as cursor:
@@ -78,6 +102,19 @@ class DoctorForm:
             if row:
                 return row[0]
             return None
+<<<<<<< HEAD
+=======
+        
+    @staticmethod
+    def get_email(id):
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT EMAIL FROM doctor_form WHERE id = %s", [id])
+            row = cursor.fetchone()
+            if row:
+                return row[0]
+            return None
+        
+>>>>>>> 403676c8b27c6a22bf4eaf64872c5c9d742c71b9
     @staticmethod
     def filter_by_id(id):
         with connection.cursor() as cursor:
@@ -94,6 +131,10 @@ class DoctorForm:
         else:
             file_data = None
         with connection.cursor() as cursor:
+<<<<<<< HEAD
+=======
+            password = make_password(password)
+>>>>>>> 403676c8b27c6a22bf4eaf64872c5c9d742c71b9
             cursor.execute("""
                 INSERT INTO doctor_form (email,phone,password,card_id,name ,last_name,birth_date,speciality ,institut,experience,city,document)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s,%s,%s,%s,%s)
@@ -104,6 +145,10 @@ class DoctorForm:
 class PatientManager:
     @staticmethod
     def create_patient(card_id, name, last_name, email, phone, password, city_id, birth_date):
+<<<<<<< HEAD
+=======
+        password = make_password(password)
+>>>>>>> 403676c8b27c6a22bf4eaf64872c5c9d742c71b9
         with connection.cursor() as cursor:
             cursor.execute("""
                 INSERT INTO patient (card_id, name, last_name, email, phone, password, city_id, birth_date)
@@ -144,15 +189,26 @@ class PatientManager:
                 columns = [col[0] for col in cursor.description]
                 return dict(zip(columns, row))
             return None
+<<<<<<< HEAD
         
     @staticmethod
     def check_password(email, password):
+=======
+
+    @staticmethod
+    def check__password(email, password):
+>>>>>>> 403676c8b27c6a22bf4eaf64872c5c9d742c71b9
         with connection.cursor() as cursor:
             cursor.execute("SELECT password FROM patient WHERE email = %s", [email])
             row = cursor.fetchone()
             if row:
+<<<<<<< HEAD
                 if row[0] == password:
                     return True
+=======
+                stored_password = row[0]
+                return check_password(password, stored_password)
+>>>>>>> 403676c8b27c6a22bf4eaf64872c5c9d742c71b9
             return False
     
 
@@ -203,6 +259,7 @@ class DoctorManager:
                 return dict(zip(columns, row))
             return None
     @staticmethod
+<<<<<<< HEAD
     def check_password(email, password):
         with connection.cursor() as cursor:
             cursor.execute("SELECT password FROM doctor WHERE email = %s", [email])
@@ -211,3 +268,15 @@ class DoctorManager:
                 if row[0] == password:
                     return True
             return False 
+=======
+    def check__password(email, password):
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT password FROM doctor WHERE email = %s", [email])
+            row = cursor.fetchone()
+
+            if row:
+                stored_password = row[0]
+                return check_password(password, stored_password)
+            return False
+             
+>>>>>>> 403676c8b27c6a22bf4eaf64872c5c9d742c71b9
