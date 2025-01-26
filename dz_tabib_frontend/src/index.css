@@ -1,0 +1,10 @@
+/* Google Maps */
+@import "leaflet/dist/leaflet.css";
+.leaflet-container {
+    width: 100vw;
+    height: 100vh;
+}
+/* Importing Tailwind's base styles */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
