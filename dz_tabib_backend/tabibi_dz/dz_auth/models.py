@@ -30,11 +30,21 @@ class Adminsrator :
             if approved:
                 # Add the doctor to the doctor table
                 cursor.execute("""
-                    INSERT INTO doctor (doctor_id, name, specialty_id,last_name,phone,email,password,address)
-                    SELECT card_id, name, speciality, last_name,phone,email,password,city
+                    INSERT INTO doctor (doctor_id, name, specialty_id,last_name,phone,email,password)
+                    SELECT card_id, name, speciality, last_name,phone,email,password
                     FROM doctor_form
                     WHERE doctor_form.id= %s
                 """, [doctor_id])
+
+                cursor.execute(""" 
+                INSERT INTO doctor_location (id,street,latitude,longitude)
+                SELECT card_id, street,latitude,longitude
+                    FROM doctor_form
+                    WHERE doctor_form.id= %s""",[doctor_id])
+            else :
+                cursor.execute("DELETE FROM doctor_location WHERE doctor_location.id = %s", [doctor_id])
+
+
                 
                 # Remove the doctor from the doctor_form table
                 
@@ -65,7 +75,7 @@ class Adminsrator :
             row = cursor.fetchone()
             if row:
                 stored_password = row[0]
-                return check_password(password, stored_password)
+                return password ==stored_password
             return False
     
         
@@ -78,6 +88,13 @@ class DoctorForm:
             cursor.execute("SELECT * FROM doctor_form")
             columns = [col[0] for col in cursor.description]
             return [dict(zip(columns, row)) for row in cursor.fetchall()]
+    @staticmethod
+    def fetch_all_specialities () :
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM specialty")
+            columns = [col[0] for col in cursor.description]
+            return [dict(zip(columns, row)) for row in cursor.fetchall()]
+
     @staticmethod
     def fetch_document_by_id(doctor_id):
         with connection.cursor() as cursor:
@@ -106,7 +123,7 @@ class DoctorForm:
                 return dict(zip(columns, row))
             return None
     @staticmethod
-    def create_form (email,phone,password,card_id,name ,last_name,birth_date,speciality,institut,experience,city_id,document):
+    def create_form (email,phone,password,card_id,name ,last_name,birth_date,speciality,institut,experience,document,street,latitude,longitude):
         if document:
             file_data = document.read()  # Read the file content as binary data
         else:
@@ -114,21 +131,34 @@ class DoctorForm:
         with connection.cursor() as cursor:
             password = make_password(password)
             cursor.execute("""
-                INSERT INTO doctor_form (email,phone,password,card_id,name ,last_name,birth_date,speciality ,institut,experience,city,document)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s,%s,%s,%s,%s)
-            """, [email,phone,password,card_id,name ,last_name,birth_date,speciality,institut,experience,city_id,file_data])
-
+                INSERT INTO doctor_form (email,phone,password,card_id,name ,last_name,birth_date,speciality ,institut,experience,document,street,latitude,longitude)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s,%s,%s,%s,%s,%s,%s)
+            """, [email,phone,password,card_id,name ,last_name,birth_date,speciality,institut,experience,file_data,street,latitude,longitude])
+            card_id = int(card_id)
+        
 
 
 class PatientManager:
     @staticmethod
-    def create_patient(card_id, name, last_name, email, phone, password, city_id, birth_date):
+    def get_password(user):
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT password FROM patient WHERE card_id = %s", [user])
+            row = cursor.fetchone()
+            if row:
+                return row[0]
+            return None
+    def create_patient(card_id, name, last_name, email, phone, password, birth_date,street,latitude,longitude):
         password = make_password(password)
         with connection.cursor() as cursor:
             cursor.execute("""
-                INSERT INTO patient (card_id, name, last_name, email, phone, password, city_id, birth_date)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-            """, [card_id, name, last_name, email, phone, password, city_id, birth_date])
+                INSERT INTO patient (card_id, name, last_name, email, phone, password, birth_date)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """, [card_id, name, last_name, email, phone, password, birth_date])
+        with connection.cursor() as cursor:
+
+            cursor.execute(""" 
+                INSERT INTO patient_location (id,street,latitude,longitude)
+                VALUES (%s, %s, %s,%s)""",[card_id,street,latitude,longitude])
 
     @staticmethod
     def fetch_all_patients():
@@ -149,7 +179,7 @@ class PatientManager:
     @staticmethod
     def filter_by(filter, obj):
         # Allowed filter fields to prevent SQL injection
-        allowed_filters = ['card_id', 'name', 'last_name', 'email', 'phone', 'city_id', 'birth_date']
+        allowed_filters = ['card_id', 'name', 'last_name', 'email', 'phone', 'birth_date']
         
         if filter not in allowed_filters:
             raise ValueError(f"Invalid filter: {filter}")
@@ -174,18 +204,40 @@ class PatientManager:
                 stored_password = row[0]
                 return check_password(password, stored_password)
             return False
+    @staticmethod
+    def get_emai(id):
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT EMAIL FROM patient WHERE doctor_id = %s", [id])
+            row = cursor.fetchone()
+            if row:
+                return row[0]
+            return None
+             
     
 
 
 
 class DoctorManager:
     @staticmethod
-    def create_doctor(doctor_id, specialty_id, name, last_name, email, phone, password, address):
+    def get_password(user):
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT password FROM doctor WHERE doctor_id = %s", [user])
+            row = cursor.fetchone()
+            if row:
+                return row[0]
+            return None
+    @staticmethod
+    def create_doctor(doctor_id, specialty_id, name, last_name, email, phone, password,street,latitude,longitude):
         with connection.cursor() as cursor:
             cursor.execute("""
-                INSERT INTO doctor (doctor_id, specialty_id, name, last_name, email, phone, password, address)
+                INSERT INTO doctor (doctor_id, specialty_id, name, last_name, email, phone, password)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-            """, [doctor_id, specialty_id, name, last_name, email, phone, password, address])
+            """, [doctor_id, specialty_id, name, last_name, email, phone, password])
+        with connection.cursor() as cursor:
+
+            cursor.execute(""" 
+                INSERT INTO doctor_location (street,latitude,longitude)
+                VALUES (%s, %s, %s)""",[street,latitude,longitude])
 
     @staticmethod
     def fetch_all_doctors():
@@ -197,7 +249,7 @@ class DoctorManager:
     @staticmethod
     def filter_by(filter, obj):
         # Allowed filter fields to prevent SQL injection
-        allowed_filters = ['doctor_id','specialty_id', 'name', 'last_name', 'email', 'phone','address']
+        allowed_filters = ['doctor_id','specialty_id', 'name', 'last_name', 'email', 'phone']
         
         if filter not in allowed_filters:
             raise ValueError(f"Invalid filter: {filter}")
@@ -232,4 +284,13 @@ class DoctorManager:
                 stored_password = row[0]
                 return check_password(password, stored_password)
             return False
+    
+    @staticmethod
+    def get_emai(id):
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT EMAIL FROM doctor WHERE doctor_id = %s", [id])
+            row = cursor.fetchone()
+            if row:
+                return row[0]
+            return None
              

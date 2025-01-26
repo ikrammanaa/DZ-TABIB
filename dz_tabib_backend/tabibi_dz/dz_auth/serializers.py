@@ -10,7 +10,9 @@ class OTPSerializer(serializers.Serializer):
 
 
 class PersonalInfoSerializer(serializers.Serializer):
-    city_id = serializers.IntegerField()
+    longitude = serializers.IntegerField()
+    latitude = serializers.IntegerField()
+    street = serializers.CharField(max_length=255)
 
 
 
@@ -25,6 +27,9 @@ class Form_info(serializers.Serializer):
     speciality=serializers.IntegerField()
     institut=serializers.CharField(max_length=255)
     experience=serializers.IntegerField()
+
+class PasswordSerializer(serializers.Serializer):
+    new_password = serializers.CharField(max_length=255)
 
 from rest_framework import serializers
 
