@@ -84,7 +84,7 @@ export const doctors = [
       reviews: 765,
       img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQfEry1FIDXr2v6ZEvWOn0PgOjsbsthO06JsA&s",
       availability: {
-        "2024-12-28": ["08:00 AM"],
+        "2025-02-01": ["08:00 AM"],
         "2024-12-29": ["08:00 AM", "10:00 AM", "02:00 PM"],
         "2024-12-30": ["08:00 AM", "10:00 AM", "02:00 PM"]
       },
