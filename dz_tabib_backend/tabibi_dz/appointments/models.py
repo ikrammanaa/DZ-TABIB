@@ -118,7 +118,7 @@ class BookingManager:
             "roomMode": "group",
             
             
-                "endDate": "2024-12-31T23:59:59Z"  # Set a long validity for the room
+                "endDate": "2026-12-31T23:59:59Z"  # Set a long validity for the room
             }
         
 
@@ -189,7 +189,12 @@ class BookingManager:
             """, [doctor_id, date])
             row = cursor.fetchone()
             if not row:
+                cursor.execute("""
+                DELETE  FROM schedules
+                WHERE doctor_id = %s AND day = %s
+            """, [doctor_id, date])
                 return {"error": "No schedule found for the given date"}
+
 
             available_sessions = list(row[0])
             if available_sessions[schedule] != '1':
@@ -246,3 +251,97 @@ class BookingManager:
                 "roomUrl": room_url,
                 "timeSlot": SCHEDULE_MAPPING[schedule]
             }
+class Booking:
+    @staticmethod
+    def get_patient_bookings(id) :
+        with connection.cursor() as cursor:
+            cursor.execute("""
+            SELECT * FROM booking  
+            WHERE patient_id = %s AND day >= %s
+            """, [id, timezone.now().date()])
+            rows = cursor.fetchall()
+            columns = [col[0] for col in cursor.description]
+            return [dict(zip(columns, row)) for row in rows]
+        
+
+    @staticmethod    
+    def get_doctor_bookings(id):
+         with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT * from booking  
+                WHERE doctor_id = %s AND day >= %s
+            """, [id, timezone.now().date()])
+            rows = cursor.fetchall()
+            columns = [col[0] for col in cursor.description]
+            return [dict(zip(columns, row)) for row in rows]
+         
+from django.utils import timezone
+
+class History_booking :
+    @staticmethod
+    def get_patient_history(id):
+        with connection.cursor() as cursor:
+            cursor.execute("""
+            SELECT * FROM booking  
+            WHERE patient_id = %s AND day < %s
+            """, [id, timezone.now().date()])
+            rows = cursor.fetchall()
+            columns = [col[0] for col in cursor.description]
+            return [dict(zip(columns, row)) for row in rows]
+        
+
+    @staticmethod    
+    def get_doctor_history(id):
+         with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT * from booking  
+                WHERE doctor_id = %s AND day < %s
+            """, [id, timezone.now().date()])
+            rows = cursor.fetchall()
+            columns = [col[0] for col in cursor.description]
+            return [dict(zip(columns, row)) for row in rows]
+        
+            
+        
+
+    
+class RatingManager :
+    @staticmethod
+    def get_ratings(doctor_id):
+        with connection.cursor() as cursor:
+            cursor.execute("""
+            SELECT * FROM rating
+            WHERE doctor_id = %s
+            """, [doctor_id])
+            rows = cursor.fetchall()
+            columns = [col[0] for col in cursor.description]
+            return [dict(zip(columns, row)) for row in rows]
+    @staticmethod
+    def get_final_rating(doctor_id):
+        with connection.cursor() as cursor:
+            cursor.execute("""
+            SELECT AVG(rating) FROM rating
+            WHERE doctor_id = %s
+            """, [doctor_id])
+            row = cursor.fetchone()
+            return row[0]
+    
+    @staticmethod
+    def add_rating(doctor_id, patient_id, rating, comment):
+        with connection.cursor() as cursor:
+            # Check if the patient_id and doctor_id are in the booking table and the date is less than now
+            cursor.execute("""
+                SELECT COUNT(*) FROM booking
+                WHERE doctor_id = %s AND patient_id = %s AND day < %s
+            """, [doctor_id, patient_id, timezone.now().date()])
+            count = cursor.fetchone()[0]
+
+            if count == 0:
+                raise ValueError("The patient and doctor must have a past booking")
+
+            # Insert the rating
+            cursor.execute("""
+                INSERT INTO rating (doctor_id, patient_id, rating, comment)
+                VALUES (%s, %s, %s, %s)
+            """, [doctor_id, patient_id, rating, comment])
+    

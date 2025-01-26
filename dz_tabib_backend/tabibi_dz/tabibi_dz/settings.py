@@ -39,7 +39,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'dz_auth.apps.CustomAuthConfig',
-    
+    'appointments',
+    'account_infos',
+    'search',
     'rest_framework.authtoken',
     'corsheaders',
 

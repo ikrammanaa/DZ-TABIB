@@ -3,7 +3,7 @@ from .views import (RegisterStep1View,VerifyOTPView,RegisterStep3View,
  RegisterStep4View,get_all_patients,RegisterStep1View_doc ,
  RegisterStep4_doc,RegisterStep5View,UploadDocDocument,
  DoctorLoginAPIView, ManagerLoginAPIView,PatientLoginAPIView,LogoutAPIView,
- get_document,approve_doctor, reject_doctor,get_doctor_forms
+ get_document,approve_doctor, reject_doctor,get_doctor_forms,Forgot_Password,OTP,New_Password1
 
  
  )
@@ -26,13 +26,18 @@ urlpatterns = [
     path('login/doctor/', DoctorLoginAPIView.as_view(),name='docotr_login'),
     path('login/admin/', ManagerLoginAPIView.as_view(),name='admin_login'),
 
-    path('logout/', LogoutAPIView.as_view(), name='logout'),
+    path('logout/', LogoutAPIView, name='logout'),
     path('admin/doctor_forms/', get_doctor_forms, name='doctor_forms'),
 
     path('admin/approve/<int:doctor_id>/', approve_doctor,name='approved'),
     path('admin/reject/<int:doctor_id>/', reject_doctor,name='rejected'),
 
-    path('admin/document/<int:doctor_id>/', get_document, name='show_doctor_document')
+    path('admin/document/<int:doctor_id>/', get_document, name='show_doctor_document'),
+
+    #forgot password
+    path('forgot_password/', Forgot_Password.as_view(), name='forgot_password'),
+    path('otp/', OTP.as_view(), name='otp'),
+    path('new_password/', New_Password1.as_view(), name='new_password'),
 
 
 

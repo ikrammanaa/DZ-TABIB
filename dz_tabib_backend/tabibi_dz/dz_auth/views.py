@@ -25,7 +25,7 @@ from rest_framework.decorators import api_view, permission_classes, authenticati
 
 # Models & Serializers Imports
 from .models import PatientManager, DoctorManager, DoctorForm, Adminsrator
-from .serializers import RegisterSerializer,OTPSerializer,PersonalInfoSerializer,doc_personal_info,Form_info
+from .serializers import RegisterSerializer,OTPSerializer,PersonalInfoSerializer,doc_personal_info,Form_info,PasswordSerializer
 
 # External Libraries
 import random
@@ -63,7 +63,75 @@ def send_otp(email, otp):
 
     send_mail(subject, message, email_from, recipient_list)
 
+class Forgot_Password(APIView): 
+    def post(self, request, *args, **kwargs):
+        email = request.data.get('email')
+        if not email:
+            return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
+        patient = PatientManager.filter_by('email', email)
+        if not patient:
+            doctor=DoctorManager.filter_by('email', email)
+            if not doctor:
+                return Response({"error": "Patient not found"}, status=status.HTTP_404_NOT_FOUND)
+            
+        otp = generate_otp()
+        request.session['email'] = email
+        request.session['otp'] = otp
+        request.session.save()
+        send_otp(email, otp)
+        return Response({"message": "OTP sent to email"}, status=status.HTTP_200_OK)
+from account_infos.models import baseUserManager
 
+class OTP(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = OTPSerializer(data=request.data)
+        if serializer.is_valid():
+            # Inside your view
+            print("hello ",request.session.keys())  # Check if OTP is being stored in session
+
+            otp = serializer.validated_data['otp']
+            stored_otp = request.session.get('otp')
+
+            if not stored_otp:
+                return Response({"error": "OTP not found or expired"}, status=status.HTTP_400_BAD_REQUEST)
+
+            if otp == stored_otp:
+                request.session['otp_verified'] = True
+                return Response({"message": "OTP verified successfully"}, status=status.HTTP_200_OK)
+            else:
+                return Response({"error": "Invalid OTP"}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class New_Password1(APIView):
+    def post(self, request, *args, **kwargs):
+        if not request.session.get('otp_verified'):
+            return Response({"error": "OTP verification is required"}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = PasswordSerializer(data=request.data)
+        if serializer.is_valid():
+            email = request.session.get('email')
+            password = serializer.validated_data['new_password']
+            patient = PatientManager.filter_by('email', email)
+            if patient:
+                baseUserManager.change_password('patient', patient.get('card_id'), password)
+                return Response({"message": "Password changed successfully"}, status=status.HTTP_200_OK)
+            doctor = DoctorManager.filter_by('email', email)
+            if doctor:
+                baseUserManager.change_password('doctor', doctor.get('doctor_id'), password)
+                return Response({"message": "Password changed successfully"}, status=status.HTTP_200_OK)
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        
+        
+
+            
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    
+    
+    
+    
 # views.py
 class RegisterStep1View_doc(APIView):
     serializer_class = RegisterSerializer
@@ -247,6 +315,71 @@ from .forms import UploadFileForm  # Make sure to import your form
 
 class RegisterStep4View(APIView):
     def post(self, request, *args, **kwargs):
+        
+        
+        
+        
+        # Perform OCR on the uploaded file
+        result = request.data.get('result')
+        
+        # Check for errors in OCR response
+        if not result or 'ParsedResults' not in result:
+            return Response({"error": "Failed to extract text from the image"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        parsed_text = result.get('ParsedResults', [{}])[0].get('ParsedText', '')
+        ocr_data = extract_details(parsed_text)
+
+        # Retrieve personal info from session
+        personal_info = request.session.get('step3', None)
+        if not personal_info:
+            return Response({"error": "Personal info is missing from session"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Check if the ID already exists
+        if PatientManager.fetch_patient_by_id(ocr_data.get('id_number')):
+            return Response({"error": "ID number is already in use"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Check if step1 data is missing from session
+        if 'step1' not in request.session:
+            return Response({"error": "Step 1 data is missing in session"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        street = personal_info.get('street')
+        
+        if not street:
+            return Response({"error": " address is missing from session"}, status=status.HTTP_400_BAD_REQUEST)
+        from django.db import connection
+
+        card_id=ocr_data.get('id_number')
+        name=str(ocr_data.get('name'))
+        last_name=str(ocr_data.get('last_name'))
+        email=str(request.session['step1']['email'])
+        phone=int(request.session['step1']['phone'])
+        password=str(request.session['step1']['password'])
+        birth_date=str(ocr_data.get('birth_date'))
+        street=personal_info.get('street')
+        longitude=personal_info.get('longitude')
+        latitude=personal_info.get('latitude') 
+        try:
+            PatientManager.create_patient(
+                card_id=card_id,
+                name=name,
+                last_name=last_name,
+                email=email,
+                phone=phone,
+                password=password,
+                birth_date=birth_date,
+                street=street,
+                latitude=latitude,
+                longitude=longitude
+
+            )
+        except Exception as e:
+            return Response({"error": f"Failed to create patient:{ocr_data}, {card_id},{name},{last_name},{email},{phone},{password},{street},{latitude},{longitude},{birth_date},{str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response({"message": "Client created successfully"}, status=status.HTTP_201_CREATED)
+    
+
+"""class RegisterStep4View(APIView):
+    def post(self, request, *args, **kwargs):
         form = UploadFileForm(request.POST, request.FILES)
         
         # Validate form
@@ -291,12 +424,10 @@ class RegisterStep4View(APIView):
         if 'step1' not in request.session:
             return Response({"error": "Step 1 data is missing in session"}, status=status.HTTP_400_BAD_REQUEST)
         
-        # Get city_id from step3 session data
-        city_id = personal_info.get('city_id')
+        street = personal_info.get('street')
         
-        # Handle missing city_id
-        if not city_id:
-            return Response({"error": "City ID is missing from session"}, status=status.HTTP_400_BAD_REQUEST)
+        if not street:
+            return Response({"error": " address is missing from session"}, status=status.HTTP_400_BAD_REQUEST)
         from django.db import connection
 
         card_id=ocr_data.get('id_number')
@@ -305,7 +436,10 @@ class RegisterStep4View(APIView):
         email=str(request.session['step1']['email'])
         phone=int(request.session['step1']['phone'])
         password=str(request.session['step1']['password'])
-        birth_date=str(ocr_data.get('birth_date')) 
+        birth_date=str(ocr_data.get('birth_date'))
+        street=personal_info.get('street')
+        longitude=personal_info.get('longitude')
+        latitude=personal_info.get('latitude') 
         try:
             PatientManager.create_patient(
                 card_id=card_id,
@@ -314,14 +448,17 @@ class RegisterStep4View(APIView):
                 email=email,
                 phone=phone,
                 password=password,
-                city_id=city_id,
-                birth_date=birth_date
+                birth_date=birth_date,
+                street=street,
+                latitude=latitude,
+                longitude=longitude
+
             )
         except Exception as e:
-            return Response({"error": f"Failed to create patient:{ocr_data}, {card_id},{name},{last_name},{email},{phone},{password},{city_id},{birth_date},{str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": f"Failed to create patient:{ocr_data}, {card_id},{name},{last_name},{email},{phone},{password},{street},{latitude},{longitude},{birth_date},{str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response({"message": "Client created successfully"}, status=status.HTTP_201_CREATED)
-    
+    """
 
 class RegisterStep4_doc(APIView):
     def post(self, request, *args, **kwargs):
@@ -369,18 +506,17 @@ class RegisterStep4_doc(APIView):
         if 'step1' not in request.session:
             return Response({"error": "Step 1 data is missing in session"}, status=status.HTTP_400_BAD_REQUEST)
         
-        # Get city_id from step3 session data
-        city_id = personal_info.get('city_id')
+        street = personal_info.get('street')
         
-        # Handle missing city_id
-        if not city_id:
-            return Response({"error": "City ID is missing from session"}, status=status.HTTP_400_BAD_REQUEST)
+        if not street:
+            return Response({"error": "address  is missing from session"}, status=status.HTTP_400_BAD_REQUEST)
         from django.db import connection
 
         card_id=ocr_data.get('id_number')
         name=str(ocr_data.get('name'))
         last_name=str(ocr_data.get('last_name'))
         birth_date=str(ocr_data.get('birth_date')) 
+
         try:
                 request.session['step4'] = {
                     'card_id': card_id,
@@ -454,7 +590,9 @@ class UploadDocDocument(APIView):
         speciality=request.session['step5']['speciality']
         institut=request.session['step5']['institut']
         experience=request.session['step5']['experience']
-        city_id=request.session['step3']['city_id']
+        street=request.session['step3']['street']
+        latitude=request.session['step3']['latitude']
+        longitude=request.session['step3']['longitude']
         
         DoctorForm.create_form(
             email=email,
@@ -467,8 +605,11 @@ class UploadDocDocument(APIView):
             speciality=speciality,
             institut=institut,
             experience=experience,
-            city_id=city_id,
             document=file,
+            street=street,
+            latitude=latitude,
+            longitude=longitude
+
         )
         return Response({"message": "Document uploaded successfully"}, status=status.HTTP_201_CREATED)
                    
@@ -547,7 +688,7 @@ class DoctorLoginAPIView(BaseLoginAPIView):
         # Fetch the doctor by email
         doctor = DoctorManager.filter_by('email',email)
         if doctor and DoctorManager.check__password(email, password):
-            return self.authenticate_user(doctor,'docotr_id')
+            return self.authenticate_user(doctor,'doctor_id')
         
         return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -580,7 +721,7 @@ class ShowDoctorDocumentAPI(APIView):
         return response
     
 
-@api_view(['POST'])
+@api_view(['GET'])
 
 def get_document(request, doctor_id):
     user=get_authenticated_user(request, Adminsrator)
@@ -599,6 +740,19 @@ def get_document(request, doctor_id):
 def get_doctor_forms(request):
     # Connect to the database
     forms=DoctorForm.fetch_all_doctor_forms()
+    # Fetch all specialities
+    specialities = DoctorForm.fetch_all_specialities()
+
+    # Replace the speciality key with the actual speciality name
+    for form in forms:
+        
+        speciality_key = form['speciality']
+        form['speciality'] = specialities
+    # Remove the document field from each form as it is not serializable
+    for form in forms:
+        form.pop('document', None)
+
+
     return JsonResponse({'forms': forms})
 
 @api_view(['POST'])
@@ -634,9 +788,15 @@ def reject_doctor(request, doctor_id):
 
         
     
-    
+@api_view(['POST'])
+def LogoutAPIView(request):
+    response = Response()
+    response.delete_cookie('jwt')
+    response.data = {'message': 'Successfully logged out'}
+    response.status_code = status.HTTP_200_OK
+    return response
 
-class LogoutAPIView(APIView):
+class LogoutAPIView1(APIView):
     def post(self, request, *args, **kwargs):
         response = Response()
         response.delete_cookie('jwt')

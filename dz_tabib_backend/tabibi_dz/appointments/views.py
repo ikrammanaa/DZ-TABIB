@@ -21,7 +21,7 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 # Models & Serializers Imports
-from .models import ScheduleManager, BookingManager
+from .models import ScheduleManager, BookingManager,Booking ,History_booking, RatingManager
 from .serializers import SessionsSerializer,appointment_serializer
 # External Libraries
 import random
@@ -101,3 +101,83 @@ class book_appointment(APIView):
             return Response(result, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+
+
+@api_view(['GET'])
+def get_patient_bookings(request):
+    user=get_authenticated_user(request, PatientManager)
+    if not user:
+        return Response({"error": "Unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+    result = Booking.get_patient_bookings(user)
+    return JsonResponse(result, safe=False)
+
+
+@api_view(['GET'])
+def get_doctor_bookings(request):
+    user=get_authenticated_user(request, DoctorManager)
+    if not user:
+        return Response({"error": "Unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+    result = Booking.get_doctor_bookings(user)
+    return JsonResponse(result, safe=False)
+
+
+
+
+
+@api_view(['GET'])
+def get_patient_histroy_bookings(request):
+    user=get_authenticated_user(request, PatientManager)
+    if not user:
+        return Response({"error": "Unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+    result = History_booking.get_patient_history(user)
+    return JsonResponse(result, safe=False)
+
+
+@api_view(['GET'])
+def get_doctor_history_bookings(request):
+    user=get_authenticated_user(request, DoctorManager)
+    if not user:
+        return Response({"error": "Unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+    result = History_booking.get_doctor_history(user)
+    return JsonResponse(result, safe=False)
+
+
+
+
+
+
+@api_view(['GET'])
+def get_doctor_ratings_comments(request,doctor_id):
+    ratings = RatingManager.get_ratings(doctor_id)
+    return Response(ratings, status=status.HTTP_200_OK)
+@api_view(['GET'])
+
+def get_doctor_rating(request,doctor_id):
+    rating = RatingManager.get_final_rating(doctor_id)
+    return JsonResponse(rating, safe=False)
+
+
+
+@api_view(['POST'])
+def rate_doctor(request,doctor_id):
+    user=get_authenticated_user(request, PatientManager)
+    if not user:
+        return Response({"error": "Unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+    rating = request.data.get('rating')
+    comment = request.data.get('comment')
+    if not rating:
+        return Response({"error": "Rating is required"}, status=status.HTTP_400_BAD_REQUEST)
+    RatingManager.add_rating(doctor_id, user, rating, comment)
+    return Response({"message": "Rating added successfully"}, status=status.HTTP_201_CREATED)
+
+    
+
+@api_view(['GET'])
+def get_patient_bookings(request):
+    user_id = request.query_params.get('user_id')
+    if not user_id:
+        return Response({"error": "User ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+    result = Booking.get_patient_bookings(user_id)
+    return JsonResponse(result, safe=False)
