@@ -1,0 +1,102 @@
+/* customCalendar.css */
+
+/* General calendar styling */
+.react-calendar {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    font-family: 'Montserrat', sans-serif;
+    padding: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 80%;
+  }
+  
+  /* Navigation buttons (next/previous) */
+  .react-calendar__navigation button {
+    color: #013559;
+    font-weight: bold;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .react-calendar__navigation button:hover {
+    color: #013559;
+  }
+  
+  /* Calendar header (weekdays) */
+  .react-calendar__month-view__weekdays {
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #013559;
+  }
+  
+  .react-calendar__month-view__weekdays__weekday {
+    display: flex;
+    justify-content: center;
+    padding: 8px 0;
+  }
+  
+  /* Calendar days */
+  .react-calendar__tile {
+    padding: 10px 15px;
+    background: #fff;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    color: #013559;
+    border: 1px solid transparent;
+  }
+  
+  .react-calendar__tile:hover {
+    background: #e6f7ff;
+    border-color: #0090CF;
+  }
+  
+  .react-calendar__tile--active {
+    background: #0090CF;
+    color: #fff;
+    border-color: #0090CF;
+  }
+  
+  .react-calendar__tile--active:hover {
+    background: #007bbf;
+  }
+  
+  .react-calendar__tile--now {
+    background: #d0f0fd;
+    border-color: #0090CF;
+    font-weight: bold;
+  }
+  
+  /* Disable tiles for unavailable days */
+  .react-calendar__tile--disabled {
+    color: #c0c0c0;
+    background: #f4f4f4;
+    cursor: not-allowed;
+  }
+  
+  /* View navigation buttons (year, month) */
+  .react-calendar__navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  
+  .react-calendar__navigation button:disabled {
+    color: #ccc;
+  }
+  
+  .react-calendar__navigation button:enabled:hover {
+    background: #e6f7ff;
+    border-radius: 50%;
+  }
+  
+  /* Style calendar footer (if any custom content is added) */
+  .react-calendar__footer {
+    margin-top: 15px;
+    text-align: center;
+    font-size: 14px;
+    color: #777;
+  }
+  
